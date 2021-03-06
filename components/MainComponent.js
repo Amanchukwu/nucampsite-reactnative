@@ -1,35 +1,41 @@
 import React, { Component } from 'react';
 import Directory from './DirectoryComponent';
 import CampsiteInfo from './CampsiteInfoComponent';
-import { View } from 'react-native';
-import { CAMPSITES } from '../shared/campsites';
+import { View, Platform } from 'react-native';
+import { createStackNavigator } from 'react-navigation-stack';
+import { createAppContainer } from 'react-navigation';
+
+const DirectoryNavigator = createStackNavigator( // createStackNavigator is a Function that has one requred argument called the route-configs-object which is where we set what components will be available for the stack. We will set it to Directory and CampsiteInfo
+    {
+        Directory: { screen: Directory },
+        CampsiteInfo: { screen: CampsiteInfo }
+    }, 
+    { //Optional second argument
+        initialRouteName: 'Directory', //When the navigator is open, it will default to showing "Directory" component
+        defaultNavigationOptions: { //Configure settings for the header
+            headerStyle: {
+                backgroundColor: '#5637DD'
+            },
+            headerTintColor: '#fff',
+            headerTitleStyle: {
+                color: '#fff'
+            }
+        }
+    }
+);
+
+const AppNavigator = createAppContainer(DirectoryNavigator); //Stack navigator needs to be passed to the imported function "createAppContainer". Will return a react component that connects top level navigator to the react native application environment.
 
 class Main extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            campsites: CAMPSITES,
-            selectedCampsite: null//need to reserve a space in the local state of main component where we keep track of which campsite was selected so we know which one to tell the campsiteInfo component to display
-        };
-    }
-
-
-onCampsiteSelect(campsiteId) { //Update the seletedCampsite property in the state whenever a campsite is selected. Pass in the "campsiteId"
-    this.setState({selectedCampsite: campsiteId});
-}
-
     render() {
-        return (//Can only return one component, so wrap with <View>. "style" attribute below makes it a flexible component of normal size
-            <View style={{flex: 1}}>
-                <Directory
-                    campsites={this.state.campsites}
-                    onPress={campsiteId => this.onCampsiteSelect(campsiteId)} //pass an arrow function that contains the onCampsiteSelect. Passing the method to the Directory component so it is availble to be triggered from Directory
-                />
-                <CampsiteInfo
-                    campsite={this.state.campsites.filter( //Want to pass entire campsite object. Take entire array of campsites, filter it and look for matching campiste.id.
-                        campsite => campsite.id === this.state.selectedCampsite)[0]}//Filter returns an array, grab first item [0]
-                />
-            </View>
+        return (
+            <View
+                style={{
+                    flex: 1,
+                    paddingTop: Platform.OS === 'ios' ? 0 : Expo.Constants.statusBarHeight //Patform gets the operating system and allows us to use a tertinary operator to set different padding top for IOS
+            }}>
+                <AppNavigator />
+            </View> // NOTE FOR LINE 37: container for the DirectoryNavigator which contains the screens for both the DirectoryComponent and CampsiteInfoComponent
         );
     }
 }

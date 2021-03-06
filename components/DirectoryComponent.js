@@ -1,27 +1,42 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { FlatList } from 'react-native';
 import { ListItem } from 'react-native-elements';
+import { CAMPSITES } from '../shared/campsites';
 
-function Directory(props) { //Funcitonal component that recieves props from its parent MainComponent
+class Directory extends Component {
 
-    const renderDirectoryItem = ({item}) => { //"item" is a property of a defalut object that is passed from FlatList. 
+    constructor(props) {
+        super(props);
+        this.state = {
+            campsites: CAMPSITES
+        };
+    }
+
+    static navigationOptions = { //Header text. "static" JS keyword that sets a method on the class itself instead of the object that the class creates.  This sets the 
+        title: 'Directory'
+    }
+
+    render() {
+        const { navigate } = this.props.navigation; //Each "screen" is automatically provided with the "navigation" prop which contains a lot of built in functions. "navigate" is one of the built in functions and here it is being destructured since it's the only one we need.
+        const renderDirectoryItem = ({item}) => {
+            return (
+                <ListItem
+                    title={item.name}
+                    subtitle={item.description}
+                    onPress={() => navigate('CampsiteInfo', { campsiteId: item.id })} //2 arguments, name of the screen to navigate to. 2nd argument, adds extra parameters to the route; in this case we are specifying a parameter called "campsiteId" and will give it the id of the campsite that was pressed. Now when an item in the directory is pressed, it will call the "navigate" function from React Navigation in order to switch to the CampsiteInfo screen and the campsiteId parameter will be used to pass the correct campsite object to the screen.
+                    leftAvatar={{ source: require('./images/react-lake.jpg')}}
+                />
+            );
+        };
+
         return (
-            <ListItem //The current item that is being iterated over can be accessed as "item.".
-                title={item.name} 
-                subtitle={item.description}
-                onPress={() => props.onPress(item.id)} //onPress is built into ListItem, due to this when this component is pressed, the funciton that you give it will automatically fire. onPress was passed in from MainComponent
-                leftAvatar={{ source: require('./images/react-lake.jpg')}} //leftAvatar requires an object so 2 sets of {} are needed. 1st defines JSX, 2nd defines object. "requrie" is a funciton provided by node.js.
+            <FlatList
+                data={this.state.campsites}
+                renderItem={renderDirectoryItem}
+                keyExtractor={item => item.id.toString()}
             />
         );
-    };
-
-    return (
-        <FlatList //FlatList will iterate through every item in the array that is given to the "data" and then it will run the function in the "renderItem" on every single one of the items
-            data={props.campsites} //Tells the FlatList where the data is coming from, expects an array. 
-            renderItem={renderDirectoryItem} //Specifies how to render each item in the list, uses a callback function 
-            keyExtractor={item => item.id.toString()} //Unique key, expects a string. This sets the unique key for each item.
-        />
-    );
+    }
 }
 
 export default Directory;
