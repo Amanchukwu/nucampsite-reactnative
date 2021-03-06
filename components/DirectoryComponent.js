@@ -9,6 +9,7 @@ function Directory(props) { //Funcitonal component that recieves props from its 
             <ListItem //The current item that is being iterated over can be accessed as "item.".
                 title={item.name} 
                 subtitle={item.description}
+                onPress={() => props.onPress(item.id)} //onPress is built into ListItem, due to this when this component is pressed, the funciton that you give it will automatically fire. onPress was passed in from MainComponent
                 leftAvatar={{ source: require('./images/react-lake.jpg')}} //leftAvatar requires an object so 2 sets of {} are needed. 1st defines JSX, 2nd defines object. "requrie" is a funciton provided by node.js.
             />
         );
