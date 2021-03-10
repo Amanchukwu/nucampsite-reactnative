@@ -3,6 +3,7 @@ import { Text, ScrollView, FlatList } from 'react-native';
 import { Card, ListItem } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
+import Loading from './LoadingComponent'; //Doesn't need { } because it is the default export of "LoadingComponent.js"
 
 const mapStateToProps = state => { //Recieves the state as a prop and returns the partners data from the state. Redux has defined this way to call what part of the state we are using. This funciton will need to be passed to the "connect" function.
     return {
@@ -37,6 +38,29 @@ class About extends Component {
                 />
             );
         };
+
+        if (this.props.partners.isLoading) { //We know that the object stored in "this.props.partners" holds the partners data from the redux store, which means we can access the "isLoading" property of the partner's state so we can check if "isLoading" is true or false. If true, return the <ScrollView>, <Mission> and <Card> structure and <Loading> component where the <FlatList> will eventually load.
+            return (
+                <ScrollView>
+                    <Mission />
+                    <Card
+                        title='Community Partners'>
+                        <Loading />
+                    </Card>
+                </ScrollView>
+            );
+        }
+        if (this.props.partners.errMess) {//We know that the object stored in "this.props.partners" holds the error message data from the redux store, which means we can access the "errMess" property of the partner's state so we can check if "errMess" is true or false. If true, return the <ScrollView>, <Mission> and <Card> structure and <Text> component with the error message.
+            return (
+                <ScrollView>
+                    <Mission />
+                    <Card
+                        title='Community Partners'>
+                        <Text>{this.props.partners.errMess}</Text>
+                    </Card>
+                </ScrollView>
+            );
+        }
 
         return (
             <ScrollView>

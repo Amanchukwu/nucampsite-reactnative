@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { FlatList } from 'react-native';
+import { View, FlatList, Text } from 'react-native';
 import { Tile } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
+import Loading from './LoadingComponent';
 
 const mapStateToProps = state => { //Recieves the state as a prop and returns the campsite and comments data from the state. Redux has defined this way to call what part of the state we are using. This funciton will need to be passed to the "connect" function.
     return {
@@ -29,6 +30,18 @@ class Directory extends Component {
                 />
             );
         };
+
+//Add logic here right before where the <FlatList> is depending on getting "data" from the server & check if that data is loading or has errors
+        if (this.props.campsites.isLoading) {
+            return <Loading />;
+        }
+        if (this.props.campsites.errMess) {
+            return (
+                <View>
+                    <Text>{this.props.campsites.errMess}</Text>
+                </View>
+            );
+        }
 
         return (
             <FlatList
