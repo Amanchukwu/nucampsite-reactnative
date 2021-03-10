@@ -10,6 +10,15 @@ import { createDrawerNavigator, DrawerItems } from 'react-navigation-drawer';
 import { createAppContainer } from 'react-navigation';
 import { Icon } from 'react-native-elements';
 import SafeAreaView from 'react-native-safe-area-view';
+import { connect } from 'react-redux';
+import { fetchCampsites, fetchComments, fetchPromotions, fetchPartners } from '../redux/ActionCreators'; //Importing the "thunked" action creators
+
+const mapDispatchToProps = { //instead of "mapStateToProps" function here, create the "mapDispatchToProps" object here and supply it with the name of the four action creators we are going to  use to dispatch actions. These are the action creators that have been "thunked" in order to send asynchrous calls using "fetch" to the server to bring back data from the server. Using this object allows us to access the action creators as props (just like "mapStateToProps" allowed us to access the state data as props)
+    fetchCampsites,
+    fetchComments,
+    fetchPromotions,
+    fetchPartners
+};
 
 const DirectoryNavigator = createStackNavigator( // createStackNavigator is a Function that has one requred argument called the route-configs-object which is where we set what components will be available for the stack. We will set it to Directory and CampsiteInfo
     {
@@ -195,6 +204,14 @@ const MainNavigator = createDrawerNavigator( //Needs an object that contains the
 const AppNavigator = createAppContainer(MainNavigator); //Stack navigator needs to be passed to the imported function "createAppContainer". Will return a react component that connects top level navigator to the react native application environment.
 
 class Main extends Component {
+    
+    componentDidMount() { //We want the <Main> component to call the action creators after the <Main> component has been created. So use the built in "componentDidMount" lifecycle method to do this and pass it the action creators
+        this.props.fetchCampsites();
+        this.props.fetchComments();
+        this.props.fetchPromotions();
+        this.props.fetchPartners();
+    }
+
     render() {
         return (
             <View
@@ -238,4 +255,4 @@ const styles = StyleSheet.create({ //Set up a style sheet to be used in the Navi
 });
 
 
-export default Main;
+export default connect(null, mapDispatchToProps)(Main); //Connect the main component, but because we dont have a "mapStateToProps" function, well give the "connect" function "null" for the first argument and "mapDispatchToProps" as the second component. Completes the loop to get access to the action creators as "props"

@@ -1,8 +1,15 @@
 import React, { Component } from 'react';
 import { Text, View, ScrollView, FlatList } from 'react-native';
 import { Card, Icon } from 'react-native-elements';
-import { CAMPSITES } from '../shared/campsites';
-import { COMMENTS } from '../shared/comments';  //Flow of comments through app: COMMENTS array is imported from shared directory, it is then brought into the local state of the "CampsiteInfo" component as "this.state.comments", just the comments for the target campsite are filtered into a new array called "comments", that array is passed into the "RenderComments" component as props within "CampsiteInfo" component, then in the "RenderComments" component, that array is used as the "data" for the <FlatList>, then the "renderCommentItem" function takes each comment in the array and renders it to its final form using <Text> components. Then the "RenderComments" component returns a card with all the comments in it to the "CampsiteInfo" component. "RenderComments" is wrapped in <ScrollView> which is then returned through the navigators to the "MainComponent", then "Main" is returned to the "App" component which renders everything to the devics.
+import { connect } from 'react-redux';
+import { baseUrl } from '../shared/baseUrl';
+
+const mapStateToProps = state => { //Recieves the state as a prop and returns the campsite and comments data from the state. Redux has defined this way to call what part of the state we are using. This funciton will need to be passed to the "connect" function.
+    return {
+        campsites: state.campsites,
+        comments: state.comments
+    };
+};
 
 function RenderCampsite(props) { //Pass entire props into argument from the props object it receives from CampsiteInfo component
     
@@ -12,7 +19,7 @@ function RenderCampsite(props) { //Pass entire props into argument from the prop
         return (
             <Card 
                 featuredTitle={campsite.name} 
-                image={require('./images/react-lake.jpg')}
+                image={{uri: baseUrl + campsite.image}}
             >
                 <Text style={{margin: 10}}>
                     {campsite.description}
@@ -61,8 +68,6 @@ class CampsiteInfo extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            campsites: CAMPSITES,
-            comments: COMMENTS,
             favorite: false //Stores whether or not the current campsite has been marked as a favorite
         };
     }
@@ -78,8 +83,8 @@ class CampsiteInfo extends Component {
 
     render() {
         const campsiteId = this.props.navigation.getParam('campsiteId');//Directory component navigates here and has a parameter that holds the campsiteId being passed. It is automatically passed through the naviagation prop that is passed to all "screens".
-        const campsite = this.state.campsites.filter(campsite => campsite.id === campsiteId)[0]; //Campsite array is in the local state, use the ID from above to filter that array for the campsite object with the correct id.
-        const comments = this.state.comments.filter(comment => comment.campsiteId === campsiteId); //Filter out all the comments that have a campsiteId property that matches the campsite Id we are trying to display. Makes an array of all the comments that match the campsiteId
+        const campsite = this.props.campsites.campsites.filter(campsite => campsite.id === campsiteId)[0]; //Campsite array is in the redux store, use the ID from above to filter that array for the campsite object with the correct id.
+        const comments = this.props.comments.comments.filter(comment => comment.campsiteId === campsiteId); //Filter out all the comments that have a campsiteId property that matches the campsite Id we are trying to display. Makes an array of all the comments that match the campsiteId
         return (
             <ScrollView /*Used because can't "return" more than one component. Not sure why ScrollView was chosen.*/> 
                 <RenderCampsite campsite={campsite} /*Need to pass "markFavorite" and "favorite" to the "RenderCampsite" component so the "onPress" will work for the Icon */
@@ -92,4 +97,4 @@ class CampsiteInfo extends Component {
     }
 }
 
-export default CampsiteInfo;
+export default connect(mapStateToProps)(CampsiteInfo);
