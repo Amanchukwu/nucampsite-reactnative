@@ -142,3 +142,14 @@ export const addPartners = partners => ({
     type: ActionTypes.ADD_PARTNERS,
     payload: partners
 });
+
+export const postFavorite = campsiteId => dispatch => { //This will take advantage of the redux-thunk middle ware. Pass in the campsite ID of the favorite that we want to post to the server. Wrap the function body in a second arrow function passing in the "dispatch" funciton as redux-thunk allows us to do. Not going to fetch from the server at this time, set up a simulated server response using JS "setTimeout()". When delay is over, dispatch the addFavorite action by giving "dispatch" and "addFavorite" action creator with the "campsiteId".
+    setTimeout(() => {
+        dispatch(addFavorite(campsiteId));
+    }, 2000);
+};
+
+export const addFavorite = campsiteId => ({ //standard non-thunked action creator that returns an action object with a "type" and "payload"
+    type: ActionTypes.ADD_FAVORITE,
+    payload: campsiteId
+});

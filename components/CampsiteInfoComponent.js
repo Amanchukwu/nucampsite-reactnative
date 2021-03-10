@@ -3,12 +3,18 @@ import { Text, View, ScrollView, FlatList } from 'react-native';
 import { Card, Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
+import { postFavorite } from '../redux/ActionCreators';
 
-const mapStateToProps = state => { //Recieves the state as a prop and returns the campsite and comments data from the state. Redux has defined this way to call what part of the state we are using. This funciton will need to be passed to the "connect" function.
+const mapStateToProps = state => { //Recieves the state as a prop and returns the campsite and comments and favorites data from the state. Redux has defined this way to call what part of the state we are using. This funciton will need to be passed to the "connect" function.
     return {
         campsites: state.campsites,
-        comments: state.comments
+        comments: state.comments,
+        favorites: state.favorites
     };
+};
+
+const mapDispatchToProps = { //Added to pass in the "postFavorite" action creator with the "campsiteId" as the parameter. Allows us to access "postFavorite" as props in the <CampsiteInfo> component below
+    postFavorite: campsiteId => (postFavorite(campsiteId))
 };
 
 function RenderCampsite(props) { //Pass entire props into argument from the props object it receives from CampsiteInfo component
@@ -65,16 +71,9 @@ function RenderComments({comments}) { //it recieves the "comments" array as a pr
 
 class CampsiteInfo extends Component {
     
-    constructor(props) {
-        super(props);
-        this.state = {
-            favorite: false //Stores whether or not the current campsite has been marked as a favorite
-        };
-    }
-
-//Event handler that will toggle if "this.favorite" is true or false
-    markFavorite() {
-        this.setState({favorite: true});
+//Event handler that will toggle if "this.favorite" is true or false. Because an array of campsiteIds is kept in the redux store, instead of tracking a local true or false, we need to pass in the campsiteId that will be marked true or false. Call "postFavorite" action creator which we are able to access as props thanks to setting it up earlier in the "mapDispatchToProps" object & pass it the ID of the campsite that was marked.
+    markFavorite(campsiteId) {
+        this.props.postFavorite(campsiteId);
     }
 
     static navigationOptions = { //Sets the title for the screen
@@ -88,8 +87,8 @@ class CampsiteInfo extends Component {
         return (
             <ScrollView /*Used because can't "return" more than one component. Not sure why ScrollView was chosen.*/> 
                 <RenderCampsite campsite={campsite} /*Need to pass "markFavorite" and "favorite" to the "RenderCampsite" component so the "onPress" will work for the Icon */
-                    favorite={this.state.favorite}
-                    markFavorite={() => this.markFavorite()}
+                    favorite={this.props.favorites.includes(campsiteId)}//this tests if the particular campsite that is being rendered exists in the favorites array (which we access through "this.props.favorites"). Then pass the boolean result of true or false to the <RenderCampsite> component.
+                    markFavorite={() => this.markFavorite(campsiteId)}//Being passed as a prop to <RenderCampsite>
                 />
                 <RenderComments comments={comments} /*display the RenderComments component while passing it props of the filtered list of "comments" made above.*/ />
             </ScrollView>
@@ -97,4 +96,4 @@ class CampsiteInfo extends Component {
     }
 }
 
-export default connect(mapStateToProps)(CampsiteInfo);
+export default connect(mapStateToProps, mapDispatchToProps)(CampsiteInfo); //Include "mapDispatchToProps" as the second argument being passed into the "connect" function
