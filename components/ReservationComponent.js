@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Text, View, ScrollView, StyleSheet,
-    Picker, Switch, Button } from 'react-native';
+    Picker, Switch, Button, Modal } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 //Creating this form as a react controlled form where the form data is stored in and controlled by the component itself instead of redux
@@ -13,7 +13,8 @@ class Reservation extends Component {
             campers: 1,
             hikeIn: false,
             date: new Date(), //JS built in "Date()" function
-            showCalendar: false
+            showCalendar: false,
+            showModal: false
         };
     }
 
@@ -21,13 +22,22 @@ class Reservation extends Component {
         title: 'Reserve Campsite'
     }
 
+    toggleModal() {
+        this.setState({showModal: !this.state.showModal}); //Check the current state of the showModal property and it will toggle it to the opposite using set state and logical not operator
+    }
+
     handleReservation() { //Will need to handle when the form is submitted
-        console.log(JSON.stringify(this.state));//Just echo back the form data 
-        this.setState({ //Reset state (and therefore form) to its initial values
+        console.log(JSON.stringify(this.state));//Echo back the form data 
+        this.toggleModal() //Will open the modal
+    }
+
+    resetForm() {
+        this.setState({
             campers: 1,
             hikeIn: false,
             date: new Date(),
-            showCalendar: false     
+            showCalendar: false,
+            showModal: false
         });
     }
 
@@ -88,6 +98,33 @@ class Reservation extends Component {
                         accessibilityLabel='Tap me to search for available campsites to reserve' //for screen readers
                     />
                 </View>
+                <Modal
+                    animationType={'slide'} //Built in, there are a few options
+                    transparent={false} //THis makes it opaque
+                    visible={this.state.showModal} //"visible" will be set to what is stored in the state
+                    onRequestClose={() => this.toggleModal()} //Gets triggered if user uses the hardware back button on their device and will call the "toggleModal" function.
+                >
+                    <View style={styles.modal}>
+                        <Text style={styles.modalTitle}>Search Campsite Reservations</Text>
+                        <Text style={styles.modalText}>
+                            Number of Campers: {this.state.campers}
+                        </Text>
+                        <Text style={styles.modalText}>
+                            Hike-In?: {this.state.hikeIn ? 'Yes' : 'No' /*Use terinary operator to set Yes or No depending on the state.hikeIn value. If the value is true, Yes will be displayed, otherwise No will be displayed*/}
+                        </Text>
+                        <Text style={styles.modalText} /*Shows the date from the state */>
+                            Date: {this.state.date.toLocaleDateString('en-US')}
+                        </Text>
+                        <Button
+                            onPress={() => { //built in prop that is set up to toggle the modal and reset the form
+                                this.toggleModal();
+                                this.resetForm();
+                            }}
+                            color='#5637DD'
+                            title='Close'
+                        />
+                    </View>
+                </Modal>
             </ScrollView>
         );
     }
@@ -107,6 +144,22 @@ const styles = StyleSheet.create({
     },
     formItem: {
         flex: 1 //applied to pickers and switch, the picker will then take up half as much of the row as the label
+    },
+    modal: { 
+        justifyContent: 'center',
+        margin: 20
+    },
+    modalTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        backgroundColor: '#5637DD',
+        textAlign: 'center',
+        color: '#fff',
+        marginBottom: 20
+    },
+    modalText: {
+        fontSize: 18,
+        margin: 10
     }
 });
 
