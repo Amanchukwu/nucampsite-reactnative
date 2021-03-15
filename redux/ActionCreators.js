@@ -172,3 +172,8 @@ export const addComment = comment => ({ //standard non-thunked action creator th
     type: ActionTypes.ADD_COMMENT,
     payload: comment
 });
+
+export const deleteFavorite = campsiteId => ({ //will recieve a "campsiteId" as a parameter. Normal non-thunked action creator that creates an action object.
+    type: ActionTypes.DELETE_FAVORITE,
+    payload: campsiteId
+}); 
