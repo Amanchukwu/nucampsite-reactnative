@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FlatList, View, Text, StyleSheet } from 'react-native';
+import { FlatList, View, Text, StyleSheet, Alert } from 'react-native';
 import { ListItem } from 'react-native-elements';
 import { connect } from 'react-redux'; //need so that we can access the campsites from the redux store
 import { Loading } from './LoadingComponent';
@@ -34,8 +34,27 @@ class Favorites extends Component {
                 <SwipeRow rightOpenValue={-100} style={styles.swipeRow}>
                     <View style={styles.deleteView}>
                         <TouchableOpacity
-                        style={styles.deleteTouchable}
-                        onPress={() => this.props.deleteFavorite(item.id)} //Presents the hidden delete option. "onPress" property is built in and we give it the "deleteFavorite" action that we imported that so when this component is pressed, it will call the "deleteFavorite" action using this item's id.
+                            style={styles.deleteTouchable}
+                            onPress={() => //When touching this component, want the "Alert" dialog to pop up before deleting the favorite
+                                Alert.alert( //call the method "alert" which has several paramters, the 1st is the title that will be displayed in the alert dialog. the 2nd parameter will be a short message show in the dialog box. 3rd parmaeter is the set of actions that the alert dialog needs to support provided as an array of objects where each object in the array represents a button in the alert dialog.
+                                    'Delete Favorite?', //1st parameter to "alert"
+                                    'Are you sure you wish to delete the favorite campsite ' +
+                                        item.name +
+                                        '?', //2nd parameter to "alert"
+                                    [ //3rd parameter to "alert"
+                                        {
+                                            text: 'Cancel',
+                                            onPress: () => console.log(item.name + 'Not Deleted'), //"onPress" is built in, define the funciton we want to run when the button is pressed
+                                            style: 'cancel' //this style property will affect its color
+                                        },
+                                        {
+                                            text: 'OK',                            
+                                            onPress: () => this.props.deleteFavorite(item.id) //"onPress" property is built in and we give it the "deleteFavorite" action that we imported that so when this component is pressed, it will call the "deleteFavorite" action using this item's id.
+                                        },
+                                    ],
+                                    { cancelable: false } //4th parameter, an object with the property "cancelable" set to false. By default, alerts on Android can be dismissed by tapping outside of the alert box. This parameter disables that behavior.
+                                )
+                            }                        
                         >
                         <Text style={styles.deleteText}  /*Acts as the label for the component*/ >Delete</Text>
                         </TouchableOpacity>
