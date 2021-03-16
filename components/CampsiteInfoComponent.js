@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, FlatList, Modal, Button, StyleSheet} from 'react-native';
+import { Text, View, ScrollView, FlatList, Modal, Button, StyleSheet, Alert, PanResponder } from 'react-native';
 import { Card, Icon, Rating, Input } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
@@ -23,9 +23,38 @@ function RenderCampsite(props) { //Pass entire props into argument from the prop
     
     const {campsite} = props;//Destructure "campsite" from props
    
+    const recognizeDrag = ({dx}) => (dx < -200) ? true : false; //As a parameter, this takes an object and descture from it "dx" (distance of a gesture across the x axis). Use terinary operator to return true if the value is less than -200 (means we will recgonize the gesture where there is a horizontal drag to the left that is smaller than -200px)
+
+    const panResponder = PanResponder.create({ //"PanResponder" API is put into a variable called "panResponder". Pass the "create" method an object as an argument that describes what type of responder to create. Predefined event handlers called "Pan handlers" exist and will be used to define this object.
+        onStartShouldSetPanResponder: () => true, //built in event handler that is taking an arrow funciton that simply returns true and will activate the pan responder to respond to gestures on the component that it is used on
+        onPanResponderEnd: (e, gestureState) => { //built in event handler. Paramter "e" and "gestureState" will hold values that are automatically passed into this event handler. The first paramenter gets a value of the native event object (which is why we chose to name it e. Not actually using it in this program, but need to include it so that the function gets to the second parameter which we need). "gestureState" holds important info about the gesture that just ended.
+            console.log('pan responder end', gestureState);
+            if (recognizeDrag(gestureState)) { //Call the "recgnizeDrag" function and pass the "gestureState" object to it. This will return with a true value if the gesture was more than 200px to the left (the same as saying if it was less than -200px) - means drag from right to left.
+                Alert.alert(
+                    'Add Favorite', //Alert title
+                    'Are you sure you wish to add ' + campsite.name + ' to favorites?', //Alert body text
+                    [ //Array of alert buttons
+                        {
+                            text: 'Cancel',
+                            style: 'cancel',
+                            onPress: () => console.log('Cancel Pressed')
+                        },
+                        {
+                            text: 'OK',
+                            onPress: () => props.favorite ? //Terinary operator called on press, check if it's already a favorite
+                                console.log('Already set as a favorite') : props.markFavorite() //If yes, console.log, if no, run "marFavorite" function
+                        }
+                    ],
+                    { cancelable: false }
+                );
+            }
+            return true; //Finish the onPanResponder and event handler by returning "true" at the end of the method. 
+        }
+    });
+
     if (campsite) { //make sure the object is not null or undefined
         return (
-            <Animatable.View animation='fadeInDown' duration={2000} delay={1000} /*"Animatable.View" is a built in adaptation of the <View> component. "animation" is a built in property and 'fadeInDown' is a built in condition. "delay" will wait X amount after the component is mounted before animation starts.*/ >
+            <Animatable.View animation='fadeInDown' duration={2000} delay={1000}  /*"Animatable.View" is a built in adaptation of the <View> component. "animation" is a built in property and 'fadeInDown' is a built in condition. "delay" will wait X amount after the component is mounted before animation starts.*/ {...panResponder.panHandlers} /*To connect the panResponder to this component, use spread syntax to spread out the panResponder's panHandlers then recombine them into one object to pass in as "props" to the componenet.*/ >
                 <Card 
                     featuredTitle={campsite.name} 
                     image={{uri: baseUrl + campsite.image}}
