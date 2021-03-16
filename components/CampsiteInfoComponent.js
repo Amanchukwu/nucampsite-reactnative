@@ -22,12 +22,18 @@ const mapDispatchToProps = { //Added to pass in the "postFavorite" action creato
 function RenderCampsite(props) { //Pass entire props into argument from the props object it receives from CampsiteInfo component
     
     const {campsite} = props;//Destructure "campsite" from props
+
+    const view = React.createRef(); //In order to programatically trigger an animatible component, must first set up a reference to it, then point it to an animatable component. Use a React Ref, think of as similar to how an html element is given an ID attribute to it can be referred to later in code.
    
     const recognizeDrag = ({dx}) => (dx < -200) ? true : false; //As a parameter, this takes an object and descture from it "dx" (distance of a gesture across the x axis). Use terinary operator to return true if the value is less than -200 (means we will recgonize the gesture where there is a horizontal drag to the left that is smaller than -200px)
 
     const panResponder = PanResponder.create({ //"PanResponder" API is put into a variable called "panResponder". Pass the "create" method an object as an argument that describes what type of responder to create. Predefined event handlers called "Pan handlers" exist and will be used to define this object.
-        onStartShouldSetPanResponder: () => true, //built in event handler that is taking an arrow funciton that simply returns true and will activate the pan responder to respond to gestures on the component that it is used on
-        onPanResponderEnd: (e, gestureState) => { //built in event handler. Paramter "e" and "gestureState" will hold values that are automatically passed into this event handler. The first paramenter gets a value of the native event object (which is why we chose to name it e. Not actually using it in this program, but need to include it so that the function gets to the second parameter which we need). "gestureState" holds important info about the gesture that just ended.
+        onStartShouldSetPanResponder: () => true, //built in event handler (nicknamed panhandler) that is taking an arrow funciton that simply returns true and will activate the pan responder to respond to gestures on the component that it is used on.
+        onPanResponderGrant: () => { //Built in handler (nicknamed pan handler) that is triggered when a gesture is first recgonized.
+            view.current.rubberBand(1000) // Use the ref for the animatable <View> component by accessing the "ref = {view}" property we added to it. Need to type ".current" in order to refer to the currently mounted instance of the component. Then call an animatable funciton on the component using "." to chain it on as a method.
+            .then(endState => console.log(endState.finished ? 'finished' : 'canceled')); //All animatable methods return a promise object at the end of the duration that will contain the property of "finished". The propperty "finished" will be true if the animation finished successfully & false if unable to finish for some reason. Not necessary to do anything with the promise, but we will console.log just to see how it works. Can use to add more actions to the end of an animation 
+        },
+        onPanResponderEnd: (e, gestureState) => { //built in event handler (nicknamed panhandler). Paramter "e" and "gestureState" will hold values that are automatically passed into this event handler. The first paramenter gets a value of the native event object (which is why we chose to name it e. Not actually using it in this program, but need to include it so that the function gets to the second parameter which we need). "gestureState" holds important info about the gesture that just ended.
             console.log('pan responder end', gestureState);
             if (recognizeDrag(gestureState)) { //Call the "recgnizeDrag" function and pass the "gestureState" object to it. This will return with a true value if the gesture was more than 200px to the left (the same as saying if it was less than -200px) - means drag from right to left.
                 Alert.alert(
@@ -54,7 +60,9 @@ function RenderCampsite(props) { //Pass entire props into argument from the prop
 
     if (campsite) { //make sure the object is not null or undefined
         return (
-            <Animatable.View animation='fadeInDown' duration={2000} delay={1000}  /*"Animatable.View" is a built in adaptation of the <View> component. "animation" is a built in property and 'fadeInDown' is a built in condition. "delay" will wait X amount after the component is mounted before animation starts.*/ {...panResponder.panHandlers} /*To connect the panResponder to this component, use spread syntax to spread out the panResponder's panHandlers then recombine them into one object to pass in as "props" to the componenet.*/ >
+            <Animatable.View animation='fadeInDown' duration={2000} delay={1000}  /*"Animatable.View" is a built in adaptation of the <View> component. "animation" is a built in property and 'fadeInDown' is a built in condition. "delay" will wait X amount after the component is mounted before animation starts.*/ 
+                {...panResponder.panHandlers} /*To connect the panResponder to this component, use spread syntax to spread out the panResponder's panHandlers then recombine them into one object to pass in as "props" to the componenet.*/ 
+                ref={view}/*Any react component that is a class component (Animatable.View is a class component) will allow a ref to be pointed to it. Set the "ref" property to the "view" ref that was created above. Now the view ref can be used to set up an animation using the "panResponder" */>
                 <Card 
                     featuredTitle={campsite.name} 
                     image={{uri: baseUrl + campsite.image}}
