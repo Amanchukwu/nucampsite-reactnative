@@ -7,6 +7,7 @@ import { baseUrl } from '../shared/baseUrl'; //will be getting images from JSON 
 import { SwipeRow } from 'react-native-swipe-list-view'; //Makes use of "TouchableOpacity" 
 import { TouchableOpacity } from 'react-native-gesture-handler'; //Installed 'react-native-gesture-handler' in an exercise before "swipe to delete" exercise.
 import { deleteFavorite } from '../redux/ActionCreators';
+import * as Animatable from 'react-native-animatable';
 
 const mapStateToProps = state => { //Get "campsites" and "favorites" data from the redux store and make it props
     return {
@@ -82,13 +83,15 @@ class Favorites extends Component {
             );
         }
         return (//If there is no loading and no error message, safe to return <FlatList> with the campsites data
-            <FlatList
-                data={this.props.campsites.campsites.filter( //Need to pass it a data prop that contains the array of campsites (this.props.campsites.campsites) with data to render. Need to also filter out the campsites where the id of the campsite matches one of the ids in the list of favorites which we access via this.props.favorites. Use the "filter" method on the array of campsites, the favorites array is an array of campsite ids so for every campsite object we check if the favorites array includes the id of that campsite. The filter method returns a new array that consists of all the campsites that have a match.
-                    campsite => this.props.favorites.includes(campsite.id)
-                )}
-                renderItem={renderFavoriteItem} //Pass "renderFavoriteItem" which we create above
-                keyExtractor={item => item.id.toString()} //Pass each "item" into a fuction and extract the id as a string to use as the unique key for each item.
-            />
+            <Animatable.View animation='fadeInRightBig' duration={2000} /*"Animatable.View" is a built in adaptation of the <View> component. "animation" is a built in property and 'fadeInDown' is a built in condition. "delay" will wait X amount after the component is mounted before animation starts.*/ >     
+                <FlatList
+                    data={this.props.campsites.campsites.filter( //Need to pass it a data prop that contains the array of campsites (this.props.campsites.campsites) with data to render. Need to also filter out the campsites where the id of the campsite matches one of the ids in the list of favorites which we access via this.props.favorites. Use the "filter" method on the array of campsites, the favorites array is an array of campsite ids so for every campsite object we check if the favorites array includes the id of that campsite. The filter method returns a new array that consists of all the campsites that have a match.
+                        campsite => this.props.favorites.includes(campsite.id)
+                    )}
+                    renderItem={renderFavoriteItem} //Pass "renderFavoriteItem" which we create above
+                    keyExtractor={item => item.id.toString()} //Pass each "item" into a fuction and extract the id as a string to use as the unique key for each item.
+                />
+            </Animatable.View>
         );
     }
 }

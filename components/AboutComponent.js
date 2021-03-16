@@ -4,6 +4,7 @@ import { Card, ListItem } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
 import Loading from './LoadingComponent'; //Doesn't need { } because it is the default export of "LoadingComponent.js"
+import * as Animatable from 'react-native-animatable';
 
 const mapStateToProps = state => { //Recieves the state as a prop and returns the partners data from the state. Redux has defined this way to call what part of the state we are using. This funciton will need to be passed to the "connect" function.
     return {
@@ -53,27 +54,31 @@ class About extends Component {
         if (this.props.partners.errMess) {//We know that the object stored in "this.props.partners" holds the error message data from the redux store, which means we can access the "errMess" property of the partner's state so we can check if "errMess" is true or false. If true, return the <ScrollView>, <Mission> and <Card> structure and <Text> component with the error message.
             return (
                 <ScrollView>
-                    <Mission />
-                    <Card
-                        title='Community Partners'>
-                        <Text>{this.props.partners.errMess}</Text>
-                    </Card>
+                    <Animatable.View animation='fadeInDown' duration={2000} delay={1000} /*"Animatable.View" is a built in adaptation of the <View> component. "animation" is a built in property and 'fadeInDown' is a built in condition. "delay" will wait X amount after the component is mounted before animation starts.*/>
+                        <Mission />
+                        <Card
+                            title='Community Partners'>
+                            <Text>{this.props.partners.errMess}</Text>
+                        </Card>
+                    </Animatable.View>
                 </ScrollView>
             );
         }
 
         return (
             <ScrollView>
-                <Mission />
-                <Card
-                    title="Community Partners"
-                >
-                    <FlatList
-                        data={this.props.partners.partners}// Was "this.state.partners" when this component held the state locally. In switching to Redux, the state is now a passed as props. First "partners" refers to the entire part of the state that handles the partners data including the isLoading and error message properties along with the partners array. The second "partners" actually referrs to the partners array.
-                        renderItem={renderPartner}
-                        keyExtractor={item => item.id.toString()}
-                    />
-                </Card>
+                <Animatable.View animation='fadeInDown' duration={2000} delay={1000} /*"Animatable.View" is a built in adaptation of the <View> component. "animation" is a built in property and 'fadeInDown' is a built in condition. "delay" will wait X amount after the component is mounted before animation starts.*/>
+                    <Mission />
+                    <Card
+                        title="Community Partners"
+                    >
+                        <FlatList
+                            data={this.props.partners.partners}// Was "this.state.partners" when this component held the state locally. In switching to Redux, the state is now a passed as props. First "partners" refers to the entire part of the state that handles the partners data including the isLoading and error message properties along with the partners array. The second "partners" actually referrs to the partners array.
+                            renderItem={renderPartner}
+                            keyExtractor={item => item.id.toString()}
+                        />
+                    </Card>
+                </Animatable.View>
             </ScrollView> 
         );
     }

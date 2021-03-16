@@ -4,6 +4,7 @@ import { Card, Icon, Rating, Input } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
 import { postFavorite, postComment } from '../redux/ActionCreators';
+import * as Animatable from 'react-native-animatable';
 
 const mapStateToProps = state => { //Recieves the state as a prop and returns the campsite and comments and favorites data from the state. Redux has defined this way to call what part of the state we are using. This funciton will need to be passed to the "connect" function.
     return {
@@ -24,33 +25,35 @@ function RenderCampsite(props) { //Pass entire props into argument from the prop
    
     if (campsite) { //make sure the object is not null or undefined
         return (
-            <Card 
-                featuredTitle={campsite.name} 
-                image={{uri: baseUrl + campsite.image}}
-            >
-                <Text style={{margin: 10}}>
-                    {campsite.description}
-                </Text>
-                <View style={styles.cardRow}>
-                    <Icon //Icon component uses icon fonts. Documentation on the icon component will give list of available icons
-                        name={props.favorite ? 'heart' : 'heart-o'} //Use {} to embed JS. Use terinary operator to check if "props.favorite" is true, if ture, make the name of the icon 'heart' which is a filled in heart, if false, make the name 'heart-o' which is heart outline
-                        type='font-awesome' //type must be sent to 'font-awesome' to use 'font-awesome'
-                        color='#f50' //color of icon
-                        raised //will give icon a shadow effect
-                        reverse //will reverse the color scheme
-                        onPress={() => props.favorite ? //"onPress" is a built in property of <Icon>. Pass the "onPress" property the "markFavorite" function by using an arrow function. Terinary operator checks if it's already a favorite, if so, it does nothing, if not, it will make the heart a favorite.
-                        console.log('Already set as a favorite') : props.markFavorite()}
-                    />
-                    <Icon
-                        name='pencil'
-                        type='font-awesome' 
-                        color='#5637DD' 
-                        raised 
-                        reverse 
-                        onPress={() => props.onShowModal()} 
-                    />
-                </View>            
-            </Card>
+            <Animatable.View animation='fadeInDown' duration={2000} delay={1000} /*"Animatable.View" is a built in adaptation of the <View> component. "animation" is a built in property and 'fadeInDown' is a built in condition. "delay" will wait X amount after the component is mounted before animation starts.*/ >
+                <Card 
+                    featuredTitle={campsite.name} 
+                    image={{uri: baseUrl + campsite.image}}
+                >
+                    <Text style={{margin: 10}}>
+                        {campsite.description}
+                    </Text>
+                    <View style={styles.cardRow}>
+                        <Icon //Icon component uses icon fonts. Documentation on the icon component will give list of available icons
+                            name={props.favorite ? 'heart' : 'heart-o'} //Use {} to embed JS. Use terinary operator to check if "props.favorite" is true, if ture, make the name of the icon 'heart' which is a filled in heart, if false, make the name 'heart-o' which is heart outline
+                            type='font-awesome' //type must be sent to 'font-awesome' to use 'font-awesome'
+                            color='#f50' //color of icon
+                            raised //will give icon a shadow effect
+                            reverse //will reverse the color scheme
+                            onPress={() => props.favorite ? //"onPress" is a built in property of <Icon>. Pass the "onPress" property the "markFavorite" function by using an arrow function. Terinary operator checks if it's already a favorite, if so, it does nothing, if not, it will make the heart a favorite.
+                            console.log('Already set as a favorite') : props.markFavorite()}
+                        />
+                        <Icon
+                            name='pencil'
+                            type='font-awesome' 
+                            color='#5637DD' 
+                            raised 
+                            reverse 
+                            onPress={() => props.onShowModal()} 
+                        />
+                    </View>            
+                </Card>
+            </Animatable.View>
         );
     }
     return <View />; //If there is nothing in the campsite object, returns an empty view
@@ -74,13 +77,15 @@ function RenderComments({comments}) { //it recieves the "comments" array as a pr
     };
 
     return ( //Want to render the comments in a <Card> component 
-        <Card title='Comments'>
-            <FlatList //comments are in an array, so use FlatList because it expects its data in the form of an array
-                data={comments} //"comments" array is used for the "data" property
-                renderItem={renderCommentItem} //"renderItem" property is given a function
-                keyExtractor={item => item.id.toString()} //Because all the comments have a unique ID, this can be set to use that ID
-            />
-        </Card>
+        <Animatable.View animation='fadeInUp' duration={2000} delay={1000} /*"Animatable.View" is a built in adaptation of the <View> component. "animation" is a built in property and 'fadeInDown' is a built in condition. "delay" will wait X amount after the component is mounted before animation starts.*/ >
+                <Card title='Comments'>
+                    <FlatList //comments are in an array, so use FlatList because it expects its data in the form of an array
+                        data={comments} //"comments" array is used for the "data" property
+                        renderItem={renderCommentItem} //"renderItem" property is given a function
+                        keyExtractor={item => item.id.toString()} //Because all the comments have a unique ID, this can be set to use that ID
+                    />
+            </Card>
+        </Animatable.View>
     );
 }
 
