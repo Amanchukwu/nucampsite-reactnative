@@ -27,6 +27,8 @@ function RenderCampsite(props) { //Pass entire props into argument from the prop
    
     const recognizeDrag = ({dx}) => (dx < -200) ? true : false; //As a parameter, this takes an object and descture from it "dx" (distance of a gesture across the x axis). Use terinary operator to return true if the value is less than -200 (means we will recgonize the gesture where there is a horizontal drag to the left that is smaller than -200px)
 
+    const recognizeComment = ({dx}) => (dx > 200) ? true : false; 
+
     const panResponder = PanResponder.create({ //"PanResponder" API is put into a variable called "panResponder". Pass the "create" method an object as an argument that describes what type of responder to create. Predefined event handlers called "Pan handlers" exist and will be used to define this object.
         onStartShouldSetPanResponder: () => true, //built in event handler (nicknamed panhandler) that is taking an arrow funciton that simply returns true and will activate the pan responder to respond to gestures on the component that it is used on.
         onPanResponderGrant: () => { //Built in handler (nicknamed pan handler) that is triggered when a gesture is first recgonized.
@@ -53,7 +55,10 @@ function RenderCampsite(props) { //Pass entire props into argument from the prop
                     ],
                     { cancelable: false }
                 );
-            }
+            } else if (recognizeComment(gestureState)) {
+                props.onShowModal();
+            };
+            
             return true; //Finish the onPanResponder and event handler by returning "true" at the end of the method. 
         }
     });
