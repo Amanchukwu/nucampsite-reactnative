@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, FlatList, Modal, Button, StyleSheet, Alert, PanResponder } from 'react-native';
+import { Text, View, ScrollView, FlatList, Modal, Button, StyleSheet, Alert, PanResponder, Share } from 'react-native';
 import { Card, Icon, Rating, Input } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
@@ -62,6 +62,17 @@ function RenderCampsite(props) { //Pass entire props into argument from the prop
         }
     });
 
+    const shareCampsite = (title, message, url) => { //THis will have 3 parameters. Connected to app by adding a new button in the "return" method.
+        Share.share({ //Use Share API's share method. Takes up to 2 objects as arguments. 1st object, which is required, is for the content of what is being shared, we give it 3 properties that takes the properties passed into the function.
+            title: title, //Not required
+            message: `${title}: ${message} ${url}`, //Android requires a message
+            url: url
+        },{
+            dialogTitle: 'Share ' + title //2nd argument object that holds extra configuration values. "dialogTitle" is for Android only, will be the dialog that pops up when you go to share something.
+        });
+    };
+
+
     if (campsite) { //make sure the object is not null or undefined
         return (
             <Animatable.View animation='fadeInDown' duration={2000} delay={1000}  /*"Animatable.View" is a built in adaptation of the <View> component. "animation" is a built in property and 'fadeInDown' is a built in condition. "delay" will wait X amount after the component is mounted before animation starts.*/ 
@@ -91,6 +102,14 @@ function RenderCampsite(props) { //Pass entire props into argument from the prop
                             raised 
                             reverse 
                             onPress={() => props.onShowModal()} 
+                        />
+                        <Icon
+                            name={'share'}
+                            type='font-awesome'
+                            color='#5637DD'
+                            raised
+                            reverse
+                            onPress={() => shareCampsite(campsite.name, campsite.description, baseUrl + campsite.image)} //Don't need "props" infront of this funciton name because this function was not passed into the component as a prop.  Will pass to this function 3 arguments as seen.
                         />
                     </View>            
                 </Card>
