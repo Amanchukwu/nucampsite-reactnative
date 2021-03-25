@@ -6,6 +6,7 @@ import About from './AboutComponent';
 import Contact from './ContactComponent';
 import Reservation from './ReservationComponent';
 import Favorites from './FavoritesComponent';
+import Login from './LoginComponent';
 import { View, Platform, StyleSheet, Text, ScrollView, Image } from 'react-native';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createDrawerNavigator, DrawerItems } from 'react-navigation-drawer';
@@ -168,6 +169,29 @@ const FavoritesNavigator = createStackNavigator(
     }
 );
 
+const LoginNavigator = createStackNavigator(
+    {
+        Login: { screen: Login }
+    },
+    {
+        defaultNavigationOptions: ({navigation}) => ({
+            headerStyle: {
+                backgroundColor: '#5637DD'
+            },
+            headerTintColor: '#fff',
+            headerTitleStyle: {
+                color: '#fff'
+            },
+            headerLeft: <Icon
+                name='sign-in'
+                type='font-awesome'
+                iconStyle={styles.stackIcon}
+                onPress={() => navigation.toggleDrawer()}
+            />
+        })
+    }
+);
+
 const CustomDrawerContentComponent = props => ( //Recieve "props" as its parameter and will return a view of our customized drawer
     <ScrollView> 
         <SafeAreaView //specifically for the iPhoneX, takes into account the rounded corners and camera notch. Default drawer component already includes this. But has to be added here because we are overriding the default.
@@ -188,6 +212,19 @@ const CustomDrawerContentComponent = props => ( //Recieve "props" as its paramet
 
 const MainNavigator = createDrawerNavigator( //Needs an object that contains the screens that will be in the drawer for first object, can take optional second argument
     {
+        Login: { //Add "Login" screen to the top of the DrawerNavigator because we want it to be the first option in the list. However, now every time the app is loaded, the Login screen will be loaded first, which is not what we want. Fixed by adding "initialRouteName: 'Home'" option to the bottom of the drawer navigator in the options object 
+            screen: LoginNavigator,
+            navigationOptions: {
+                drawerIcon: ({tintColor}) => (
+                    <Icon
+                        name='sign-in'
+                        type='font-awesome'
+                        size={24}
+                        color={tintColor}
+                    />
+                )
+            }
+        },
         Home: {
             screen: HomeNavigator,
             navigationOptions: { //setting up navigation options for the HomeNavigator. Set up as objects containing the "drawerIcon" property
@@ -272,6 +309,7 @@ const MainNavigator = createDrawerNavigator( //Needs an object that contains the
         }
     },
     {
+        initialRouteName: 'Home', //Added so that the 'Home' screen will be the first screen loaded as opposed to the login screen
         drawerBackgroundColor: '#CEC8FF',
         contentComponent: CustomDrawerContentComponent //Connect "CustomDrawerContentComponenet" to the drawer navigator. Set the "contentComponent:" propery to the "CustomDrawerContentComponenet" constant and that will tell the navigator to use this component to render the content of the side drawer
     }

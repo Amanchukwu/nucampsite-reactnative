@@ -20,7 +20,6 @@ const mapDispatchToProps = { //Added to pass in the "postFavorite" action creato
 };
 
 function RenderCampsite(props) { //Pass entire props into argument from the props object it receives from CampsiteInfo component
-    
     const {campsite} = props;//Destructure "campsite" from props
 
     const view = React.createRef(); //In order to programatically trigger an animatible component, must first set up a reference to it, then point it to an animatable component. Use a React Ref, think of as similar to how an html element is given an ID attribute to it can be referred to later in code.
