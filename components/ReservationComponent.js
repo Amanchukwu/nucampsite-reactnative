@@ -3,6 +3,7 @@ import { Text, View, ScrollView, StyleSheet,
     Picker, Switch, Button, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Animatable from 'react-native-animatable';
+import * as Notifications from 'expo-notifications';
 
 //Creating this form as a react controlled form where the form data is stored in and controlled by the component itself instead of redux
 class Reservation extends Component { 
@@ -40,8 +41,11 @@ class Reservation extends Component {
                },
                {
                    text: 'OK',
-                   onPress: () => this.resetForm(),
-               }
+                   onPress: () => {
+                        this.presentLocalNotification(this.state.date.toLocaleDateString('en-US')); //Call the "presentLocalNotification" async function that we created and pass in the date which is taken from the reservations component's local state.
+                        this.resetForm();
+                    }
+                }
             ]
         )
     }
@@ -54,6 +58,33 @@ class Reservation extends Component {
             showCalendar: false,
             showModal: false
         });
+    }
+
+    async presentLocalNotification(date) { //async/await syntax. Want to use promises and asynchronous code because we have to request permissions and wait for a response before continuing. We create an "async" funciton (a special type of function that always returns a promise) using the "async" JS keyword and assigning it a function name "presentLocalNotification" giving it a parameter of "date" which we want to be the reservaiton date. Will be called in the alert's "OK" button.
+        function sendNotification() { //Dont want to send notification right away because first have to verifiy from that we have permission to do so, so put our notificaiton sending code inside another function that can be called when we are ready.
+            Notifications.setNotificationHandler({ //override default behavior of notification not showing when app is in foreground.  "setNotificationHandler" is a built in method from the Notifications API for this purpose.
+                handleNotification: async () => ({ //documentation says to set it up this way to show an alert
+                    shouldShowAlert: true
+                })
+            });
+
+            Notifications.scheduleNotificationAsync({ //Built in by Notifications API. Pass in object called "content" 
+                content: {
+                    title: 'Your Campsite Reservation Search',
+                    body: `Search for ${date} requested` //pass in "date" variable that was passed into the "presentLocalNotification" function
+                },
+                trigger: null //THis causes the notfication to fire immediately. Can be used to schedule the notification in the future & set to repeat.
+            });
+        }
+
+        //Need to check if we have permission to send notifications at all.  
+        let permissions = await Notifications.getPermissionsAsync();  //Create a variable called "permissions" and set to the value seen here. The "await" keyword can only be used inside an "async function". The Notifications API tells us that the ".getPermissionsAsync()" method wil check for if the app already has notificaitons permission from the device. Will return a promise that will fulfill with the result of that check. Using this method with the "await" keyword will cause the "presentLocalNotification" method to stop and wait for this promise to be fulfilled, once it does, it will assign the promise's result to the "permissions" variable.
+        if (!permissions.granted) { //Once done waiting, check if the permissions were not granted. If they were, the "permissions.granted" object  would have a "true" value. If the NOT (!) "permissions.granted" were true, that means we were not able to verify existing permissions (not that they were denied).
+            permissions = await Notifications.requestPermissionsAsync(); //Make an explicit request for permissions since they dont already exist.  "await" will stop the code unitl the promise from ".requestPermissionsAsync()" is fulfilled. Then store in the "permissions" variable.
+        }
+        if (permissions.granted) { //Check one more time if permissions were granted. If yes, the "permissions.granted" object is truthy, that means we already had permissions or we were able to request and get permissions. Then call "sendNotification" method that we defined earlier. Otherwise, we won't do anything at all.
+            sendNotification();
+        }
     }
 
     render() {
@@ -140,35 +171,3 @@ const styles = StyleSheet.create({
 });
 
 export default Reservation;
-
-
-/*
-                    <Modal
-                        animationType={'slide'} //Built in, there are a few options
-                        transparent={false} //THis makes it opaque
-                        visible={this.state.showModal} //"visible" will be set to what is stored in the state
-                        onRequestClose={() => this.toggleModal()} //Gets triggered if user uses the hardware back button on their device and will call the "toggleModal" function.
-                    >
-                        <View style={styles.modal}>
-                            <Text style={styles.modalTitle}>Search Campsite Reservations</Text>
-                            <Text style={styles.modalText}>
-                                Number of Campers: {this.state.campers}
-                            </Text>
-                            <Text style={styles.modalText}>
-                                Hike-In?: {this.state.hikeIn ? 'Yes' : 'No' /*Use terinary operator to set Yes or No depending on the state.hikeIn value. If the value is true, Yes will be displayed, otherwise No will be displayed
-                                </Text>
-                                <Text style={styles.modalText} /*Shows the date from the state >
-                                    Date: {this.state.date.toLocaleDateString('en-US')}
-                                </Text>
-                                <Button
-                                    onPress={() => { //built in prop that is set up to toggle the modal and reset the form
-                                        this.toggleModal();
-                                        this.resetForm();
-                                    }}
-                                    color='#5637DD'
-                                    title='Close'
-                                />
-                            </View>
-                        </Modal>
-*/
-    
