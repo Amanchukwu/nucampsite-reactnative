@@ -7,7 +7,7 @@ import Contact from './ContactComponent';
 import Reservation from './ReservationComponent';
 import Favorites from './FavoritesComponent';
 import Login from './LoginComponent';
-import { View, Platform, StyleSheet, Text, ScrollView, Image } from 'react-native';
+import { View, Platform, StyleSheet, Text, ScrollView, Image, Alert, ToastAndroid  } from 'react-native';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createDrawerNavigator, DrawerItems } from 'react-navigation-drawer';
 import { createAppContainer } from 'react-navigation';
@@ -15,6 +15,7 @@ import { Icon } from 'react-native-elements';
 import SafeAreaView from 'react-native-safe-area-view';
 import { connect } from 'react-redux';
 import { fetchCampsites, fetchComments, fetchPromotions, fetchPartners } from '../redux/ActionCreators'; //Importing the "thunked" action creators
+import NetInfo from '@react-native-community/netinfo';
 
 const mapDispatchToProps = { //instead of "mapStateToProps" function here, create the "mapDispatchToProps" object here and supply it with the name of the four action creators we are going to  use to dispatch actions. These are the action creators that have been "thunked" in order to send asynchrous calls using "fetch" to the server to bring back data from the server. Using this object allows us to access the action creators as props (just like "mapStateToProps" allowed us to access the state data as props)
     fetchCampsites,
@@ -324,6 +325,43 @@ class Main extends Component {
         this.props.fetchComments();
         this.props.fetchPromotions();
         this.props.fetchPartners();
+
+        NetInfo.fetch().then(connectionInfo => { //Use "NetInfo.fetch()" which has no parameters and will return a promise that resolves to a "NetInfoState" object to get network information just once about the current network connection. How this line works: The "NetInfo.fetch()" method returns a promise, the ".then" activates once the promise is resolved into the "netInfoState" object back which is then renamed "connectionInfo" (can be named anything) and passed into this arrow function as the argument. Using ".then" instead of "async" because that's what the docs are written as, but could be done with "async".
+            (Platform.OS === 'ios') //Check for the operating system of the device using the "Platform.OS" API and a terinary operator
+                ? Alert.alert('Initial Network Connectivity Type:', connectionInfo.type) //If IOS, send an alert to display connection info
+                : ToastAndroid.show('Initial Network Connectivity Type: ' + //If not IOS, use React Native "ToastAndroid" API to pop up a toast. It has a method ".show" that takes 2 arguments, the first is the text you want to display, the second is an interger for how long to show the toast.  ".SHORT" is 2 seconds, ".LONG" is 3.5 seconds.
+                    connectionInfo.type, ToastAndroid.LONG);
+        });
+
+        //"NetInfo.addEventListener" provides a function that can be used to unsuscribe the listener as its own return value. We'll want to save that function by assigning it to a method on the class, do this by naming the function with "this.". Must use "this" because we are already inside a method to specify that we are creating it as a method on the parent class rather than as a local variable within the "componentDidMount". 
+        this.unsubscribeNetInfo = NetInfo.addEventListener(connectionInfo => { //Call "NetInfo.addEventListener" which takes a callback function in its parameter list. The callback function will automatically have access to the "netInfoState" object as an argument. So we pass it in and rename it "connectionInfo".
+            this.handleConnectivityChange(connectionInfo);//Call another class method named "this.handleConnectivityChange" which we wrote. Pass it the "connectionInfo" / "netInfoState object"
+        }); 
+    }
+
+    componentWillUnmount() { //React lifecycle method
+        this.unsubscribeNetInfo(); //Call the method we created here to stop listening for connection changes when the <Main> component unmounts
+    }
+    
+    handleConnectivityChange = connectionInfo => { //When there is a change in the connection state, will have app respond by poping up a toast/alert with a message about the change that will vary based on the connection type
+        let connectionMsg = 'You are now connected to an active network.'; //Set up a variable using the "let" keyword so that the variable's value can be reassigned in the code below.
+        switch (connectionInfo.type) { //Switch statement that takes the type property (docs show what the types are) and re-assigns the variable's value to a new message.
+            case 'none':
+                connectionMsg = 'No network connection is active.';
+                break;
+            case 'unknown':
+                connectionMsg = 'The network connection state is now unknown.';
+                break;
+            case 'cellular':
+                connectionMsg = 'You are now connected to a cellular network.';
+                break;
+            case 'wifi':
+                connectionMsg = 'You are now connected to a WiFi network.';
+                break; //Last "break" is technically not necessary. Not using a "default" because the "connectionMsg" is already initialized in the variable above.
+        }
+        (Platform.OS === 'ios') //Check for the platform operating system
+            ? Alert.alert('Connection change:', connectionMsg) //If ISO, generate alert with the "connectionMsg"
+            : ToastAndroid.show(connectionMsg, ToastAndroid.LONG); //If Android, generate toast with "connectionMsg"
     }
 
     render() {
