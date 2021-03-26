@@ -148,22 +148,6 @@ class RegisterTab extends Component { //Creating the RegisterTab component.
         )
     }
 
-    getImageFromCamera = async () => {
-        const cameraPermission = await Permissions.askAsync(Permissions.CAMERA);
-        const cameraRollPermission = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-
-        if (cameraPermission.status === 'granted' && cameraRollPermission.status === 'granted') {
-            const capturedImage = await ImagePicker.launchCameraAsync({
-                allowsEditing: true,
-                aspect: [1, 1]
-            });
-            if (!capturedImage.cancelled) {
-                console.log(capturedImage);
-                this.setState({imageUrl: capturedImage.uri});
-            }
-        }
-    }
-
     getImageFromCamera = async () => { //Set up as an arrow function so that the corresponding <Button>'s on press can be written cleanly like this: "onPress={this.getImageFromCamera}". Set up as an "async" method so we can use "await" inside of it so we can handle promises.
         //Before using the camera, need to get permissions to use camera and read/write to cameraRoll. 
         const cameraPermission = await Permissions.askAsync(Permissions.CAMERA); //Put the first permission inside a vairable called "cameraPermission". Inside it, await the resolve value of a promise from "Premission.askAsync" for "Premissions.CAMERA". This will allow us to use the camera. 
