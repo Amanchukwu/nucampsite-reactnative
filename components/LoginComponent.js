@@ -6,6 +6,8 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { baseUrl } from '../shared/baseUrl';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as MediaLibrary from 'expo-media-library';
 
 class LoginTab extends Component { //Renamed from "Login" to "LoginTab" in order to implement the bottom tab navigator from react-navigation-tabs
 
@@ -161,7 +163,32 @@ class RegisterTab extends Component { //Creating the RegisterTab component.
             });
             if (!capturedImage.cancelled) { //Make sure the image picking process was not cancelled.  
                 console.log(capturedImage); //Console log the object that was returned.
-                this.setState({imageUrl: capturedImage.uri}); //Set the "imageUrl" state to the captured image's uri property
+                this.processImage(capturedImage.uri); //BEFORE ADDING "processImage" function this line did: Set the "imageUrl" state to the captured image's uri property
+            }
+        }
+    }
+
+    processImage = async (imgUri) => {
+          const processedImage = await ImageManipulator.manipulateAsync(
+            imgUri,
+            [{ resize: {width: 400}}],
+            {format: 'png'}
+        );
+        console.log(processedImage);
+        this.setState({imageUrl: processedImage.uri});
+    }
+
+    getImageFromGallery = async () => {
+        const cameraRollPermission = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+        if (cameraRollPermission.status === 'granted') {
+            const capturedImage = await ImagePicker.launchImageLibraryAsync({
+                allowsEditing: true,
+                aspect: [1, 1] 
+            });
+            if (!capturedImage.cancelled) {   
+                console.log(capturedImage);
+                this.processImage(capturedImage.uri);
+                MediaLibrary.saveToLibraryAsync(capturedImage.uri); 
             }
         }
     }
@@ -192,6 +219,10 @@ class RegisterTab extends Component { //Creating the RegisterTab component.
                         <Button //Added for taking a picture
                             title='Camera'
                             onPress={this.getImageFromCamera} //Give "onPress" built in property the method "this.getImageFromCamera" which we created. Just giving the name of the method and not wrapping it inside an arrow function, and not calling it by placing a parameter list after the function name.  When we don't pass any argument to the event handler like this, it is an improved way of adding the method to the "onPress" prop, but doing this will require the method to be written as an arrow function OR regular function with the bind method used. 
+                        />
+                        <Button 
+                            title='Gallery'
+                            onPress={this.getImageFromGallery}
                         />
                     </View>
                     <Input

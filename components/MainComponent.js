@@ -326,23 +326,34 @@ class Main extends Component {
         this.props.fetchPromotions();
         this.props.fetchPartners();
 
-        NetInfo.fetch().then(connectionInfo => { //Use "NetInfo.fetch()" which has no parameters and will return a promise that resolves to a "NetInfoState" object to get network information just once about the current network connection. How this line works: The "NetInfo.fetch()" method returns a promise, the ".then" activates once the promise is resolved into the "netInfoState" object back which is then renamed "connectionInfo" (can be named anything) and passed into this arrow function as the argument. Using ".then" instead of "async" because that's what the docs are written as, but could be done with "async".
-            (Platform.OS === 'ios') //Check for the operating system of the device using the "Platform.OS" API and a terinary operator
-                ? Alert.alert('Initial Network Connectivity Type:', connectionInfo.type) //If IOS, send an alert to display connection info
-                : ToastAndroid.show('Initial Network Connectivity Type: ' + //If not IOS, use React Native "ToastAndroid" API to pop up a toast. It has a method ".show" that takes 2 arguments, the first is the text you want to display, the second is an interger for how long to show the toast.  ".SHORT" is 2 seconds, ".LONG" is 3.5 seconds.
-                    connectionInfo.type, ToastAndroid.LONG);
-        });
+        this.showNetInfo();
 
-        //"NetInfo.addEventListener" provides a function that can be used to unsuscribe the listener as its own return value. We'll want to save that function by assigning it to a method on the class, do this by naming the function with "this.". Must use "this" because we are already inside a method to specify that we are creating it as a method on the parent class rather than as a local variable within the "componentDidMount". 
-        this.unsubscribeNetInfo = NetInfo.addEventListener(connectionInfo => { //Call "NetInfo.addEventListener" which takes a callback function in its parameter list. The callback function will automatically have access to the "netInfoState" object as an argument. So we pass it in and rename it "connectionInfo".
-            this.handleConnectivityChange(connectionInfo);//Call another class method named "this.handleConnectivityChange" which we wrote. Pass it the "connectionInfo" / "netInfoState object"
-        }); 
     }
 
     componentWillUnmount() { //React lifecycle method
         this.unsubscribeNetInfo(); //Call the method we created here to stop listening for connection changes when the <Main> component unmounts
     }
     
+    showNetInfo = async () => {
+        const connectionInfo = await NetInfo.fetch();  //Use "NetInfo.fetch()" which has no parameters and will return a promise that resolves to a "NetInfoState" object to get network information just once about the current network connection. WHEN THIS LINE WAS NOT USING AWAIT / ASYNC: How this line works: The "NetInfo.fetch()" method returns a promise, the ".then" activates once the promise is resolved into the "netInfoState" object back which is then renamed "connectionInfo" (can be named anything) and passed into this arrow function as the argument. Using ".then" instead of "async" because that's what the docs are written as, but could be done with "async".
+            if(connectionInfo) {
+                (Platform.OS === 'ios') //Check for the operating system of the device using the "Platform.OS" API and a terinary operator
+                    ? Alert.alert('Initial Network Connectivity Type:', connectionInfo.type) //If IOS, send an alert to display connection info
+                    : ToastAndroid.show('Initial Network Connectivity Type: ' + //If not IOS, use React Native "ToastAndroid" API to pop up a toast. It has a method ".show" that takes 2 arguments, the first is the text you want to display, the second is an interger for how long to show the toast.  ".SHORT" is 2 seconds, ".LONG" is 3.5 seconds.
+                    connectionInfo.type, ToastAndroid.LONG);
+            }
+    
+
+        //"NetInfo.addEventListener" provides a function that can be used to unsuscribe the listener as its own return value. We'll want to save that function by assigning it to a method on the class, do this by naming the function with "this.". Must use "this" because we are already inside a method to specify that we are creating it as a method on the parent class rather than as a local variable within the "componentDidMount". 
+        
+        
+        this.unsubscribeNetInfo = NetInfo.addEventListener(connectionInfo => { //Call "NetInfo.addEventListener" which takes a callback function in its parameter list. The callback function will automatically have access to the "netInfoState" object as an argument. So we pass it in and rename it "connectionInfo".
+            this.handleConnectivityChange(connectionInfo);//Call another class method named "this.handleConnectivityChange" which we wrote. Pass it the "connectionInfo" / "netInfoState object"
+        });
+        
+        
+    }
+
     handleConnectivityChange = connectionInfo => { //When there is a change in the connection state, will have app respond by poping up a toast/alert with a message about the change that will vary based on the connection type
         let connectionMsg = 'You are now connected to an active network.'; //Set up a variable using the "let" keyword so that the variable's value can be reassigned in the code below.
         switch (connectionInfo.type) { //Switch statement that takes the type property (docs show what the types are) and re-assigns the variable's value to a new message.
