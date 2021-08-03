@@ -16,6 +16,7 @@ import SafeAreaView from 'react-native-safe-area-view';
 import { connect } from 'react-redux';
 import { fetchCampsites, fetchComments, fetchPromotions, fetchPartners } from '../redux/ActionCreators'; //Importing the "thunked" action creators
 import NetInfo from '@react-native-community/netinfo';
+import Constants from 'expo-constants';
 
 const mapDispatchToProps = { //instead of "mapStateToProps" function here, create the "mapDispatchToProps" object here and supply it with the name of the four action creators we are going to  use to dispatch actions. These are the action creators that have been "thunked" in order to send asynchrous calls using "fetch" to the server to bring back data from the server. Using this object allows us to access the action creators as props (just like "mapStateToProps" allowed us to access the state data as props)
     fetchCampsites,
@@ -380,7 +381,7 @@ class Main extends Component {
             <View
                 style={{
                     flex: 1,
-                    paddingTop: Platform.OS === 'ios' ? 0 : Expo.Constants.statusBarHeight //Patform gets the operating system and allows us to use a tertinary operator to set different padding top for IOS
+                    paddingTop: Platform.OS === 'ios' ? 0 : Constants.statusBarHeight //Patform gets the operating system and allows us to use a tertinary operator to set different padding top for IOS
             }}>
                 <AppNavigator />
             </View> // NOTE FOR LINE 37: container for the DirectoryNavigator which contains the screens for both the DirectoryComponent and CampsiteInfoComponent
